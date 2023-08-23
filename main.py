@@ -149,12 +149,12 @@ def add_post(
     db: SessionLocal = Depends(get_db),
 ):
     # Payload validation
-    if len(post.text.encode()) > MAX_PAYLOAD_SIZE:
+    if len(post.description.encode()) > MAX_PAYLOAD_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Payload size exceeds maximum limit.",
         )
-    new_post = PostData(text=post.text, user_emailid=user.emailid)
+    new_post = PostData(description=post.description, user_emailid=user.emailid)
     db.add(new_post)
     db.commit()
 
@@ -172,7 +172,7 @@ def get_posts(
     if cached_posts:
         return cached_posts
     user_posts = db.query(PostData).filter(PostData.user_emailid == user.emailid).all()
-    user_posts = [{"postID": post.id, "description": post.text} for post in user_posts]
+    user_posts = [{"postID": post.id, "description": post.description} for post in user_posts]
     response_size = len(str(user_posts).encode())
     if response_size <= MAX_PAYLOAD_SIZE:
         cache[user.emailid] = user_posts
